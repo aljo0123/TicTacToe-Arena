@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tic Tac Toe Arena</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
+
+</head>
+
+<body>
+
+<div id="loadingScreen">
+
+<h1>🎮</h1>
+
+<h2>Tic Tac Toe Arena</h2>
+
+<p>Loading...</p>
+
+</div>
+
+<div id="app" style="display:none;">
+
+<div id="menu">
+
+<h1>🎮 Tic Tac Toe Arena</h1>
+
+<button id="localBtn">👥 Local 2 Player</button>
+
+<button id="computerBtn">🤖 Play Computer</button>
+
+<div id="difficultyBox">
+
+<h3>AI Difficulty</h3>
+
+<button id="easyBtn">🟢 Easy</button>
+
+<button id="mediumBtn">🟡 Medium</button>
+
+<button id="hardBtn">🔴 Hard</button>
+
+</div>
+
+</div>
+
+<!-- GAME -->
+
+<div id="game" style="display:none;">
+
+<h2 id="status">
+❌ Player X Turn
+</h2>
+
+<div class="score">
+
+<p>
+❌ X:
+<span id="xScore">0</span>
+</p>
+
+<p>
+⭕ O:
+<span id="oScore">0</span>
+</p>
+
+<p>
+🤝 Draw:
+<span id="drawScore">0</span>
+</p>
+
+</div>
+
+<div class="board">
+
+<button></button>
+<button></button>
+<button></button>
+
+<button></button>
+<button></button>
+<button></button>
+
+<button></button>
+<button></button>
+<button></button>
+
+</div>
+
+<button id="restartBtn">
+🔄 Restart
+</button>
+
+<button id="resetScoreBtn">
+🗑 Reset Score
+</button>
+
+<button id="soundBtn">
+🔊 Sound
+</button>
+
+<button id="homeBtn">
+🏠 Home
+</button>
+
+</div>
+
+</div>
+
+<!-- AUDIO -->
+
+<audio id="clickSound" src="assets/sounds/click.mp3" preload="auto"></audio>
+
+<audio id="moveSound" src="assets/sounds/move.mp3" preload="auto"></audio>
+
+<audio id="winSound" src="assets/sounds/win.mp3" preload="auto"></audio>
+
+<audio id="drawSound" src="assets/sounds/draw.mp3" preload="auto"></audio>
+
+<script src="script.js" defer></script>
+
+</body>
+
+</html>
