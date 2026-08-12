@@ -2,139 +2,498 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
+    <meta name="theme-color" content="#080a0f">
+    <meta
+        name="description"
+        content="Tic Tac Toe Arena - A modern browser Tic Tac Toe game."
+    >
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Arena</title>
 
-<title>Tic Tac Toe Arena</title>
+    <link rel="stylesheet" href="style.css">
 
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WXE3L5GVMX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-WXE3L5GVMX');
-</script>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
-
+    <script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
 </head>
 
 <body>
 
-<div id="loadingScreen">
+    <!-- LOADING SCREEN -->
 
-<h1>🎮</h1>
+    <div id="loadingScreen" class="loading-screen">
 
-<h2>Tic Tac Toe Arena</h2>
+        <div class="loading-content">
 
-<p>Loading...</p>
+            <div class="loading-mark">
+                TT
+            </div>
 
-</div>
+            <h1>Tic Tac Toe Arena</h1>
 
-<div id="app" style="display:none;">
+            <div class="loading-line">
+                <span></span>
+            </div>
 
-<div id="menu">
+            <p>Preparing the arena</p>
 
-<h1>🎮 Tic Tac Toe Arena</h1>
+        </div>
 
-<button id="localBtn">👥 Local 2 Player</button>
+    </div>
 
-<button id="computerBtn">🤖 Play Computer</button>
 
-<div id="difficultyBox">
+    <!-- APPLICATION -->
 
-<h3>AI Difficulty</h3>
+    <main id="app" style="display: none;">
 
-<button id="easyBtn">🟢 Easy</button>
+        <!-- HOME -->
 
-<button id="mediumBtn">🟡 Medium</button>
+        <section id="menu" class="screen menu-screen">
 
-<button id="hardBtn">🔴 Hard</button>
+            <div class="menu-content">
 
-</div>
+                <header class="brand">
 
-</div>
+                    <div class="brand-mark">
+                        TT
+                    </div>
 
-<!-- GAME -->
+                    <div class="brand-text">
 
-<div id="game" style="display:none;">
+                        <span class="brand-small">
+                            TIC TAC TOE
+                        </span>
 
-<h2 id="status">
-❌ Player X Turn
-</h2>
+                        <h1>
+                            ARENA
+                        </h1>
 
-<div class="score">
+                    </div>
 
-<p>
-❌ X:
-<span id="xScore">0</span>
-</p>
+                </header>
 
-<p>
-⭕ O:
-<span id="oScore">0</span>
-</p>
 
-<p>
-🤝 Draw:
-<span id="drawScore">0</span>
-</p>
+                <div class="menu-heading">
 
-</div>
+                    <span class="eyebrow">
+                        BROWSER GAME
+                    </span>
 
-<div class="board">
+                    <h2>
+                        Choose your battle.
+                    </h2>
 
-<button></button>
-<button></button>
-<button></button>
+                    <p>
+                        Challenge a friend or test your strategy against the computer.
+                    </p>
 
-<button></button>
-<button></button>
-<button></button>
+                </div>
 
-<button></button>
-<button></button>
-<button></button>
 
-</div>
+                <!-- GAME MODES -->
 
-<button id="restartBtn">
-🔄 Restart
-</button>
+                <div class="mode-grid">
 
-<button id="resetScoreBtn">
-🗑 Reset Score
-</button>
+                    <!-- LOCAL -->
 
-<button id="soundBtn">
-🔊 Sound
-</button>
+                    <button
+                        id="localBtn"
+                        class="mode-card"
+                        type="button"
+                    >
 
-<button id="homeBtn">
-🏠 Home
-</button>
+                        <span class="mode-number">
+                            01
+                        </span>
 
-</div>
+                        <span class="mode-icon mode-icon-local">
+                            2P
+                        </span>
 
-</div>
+                        <span class="mode-card-content">
 
-<!-- AUDIO -->
+                            <strong>
+                                Local Multiplayer
+                            </strong>
 
-<audio id="clickSound" src="assets/sounds/click.mp3" preload="auto"></audio>
+                            <small>
+                                Two players, one arena
+                            </small>
 
-<audio id="moveSound" src="assets/sounds/move.mp3" preload="auto"></audio>
+                        </span>
 
-<audio id="winSound" src="assets/sounds/win.mp3" preload="auto"></audio>
+                        <span class="mode-arrow">
+                            →
+                        </span>
 
-<audio id="drawSound" src="assets/sounds/draw.mp3" preload="auto"></audio>
+                    </button>
 
-<script src="script.js" defer></script>
+
+                    <!-- COMPUTER -->
+
+                    <button
+                        id="computerBtn"
+                        class="mode-card"
+                        type="button"
+                    >
+
+                        <span class="mode-number">
+                            02
+                        </span>
+
+                        <span class="mode-icon mode-icon-ai">
+                            AI
+                        </span>
+
+                        <span class="mode-card-content">
+
+                            <strong>
+                                Play vs AI
+                            </strong>
+
+                            <small>
+                                Test yourself against the computer
+                            </small>
+
+                        </span>
+
+                        <span class="mode-arrow">
+                            →
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- AI DIFFICULTY -->
+
+                <div
+                    id="difficultyBox"
+                    class="difficulty-screen"
+                >
+
+                    <div class="difficulty-header">
+
+                        <button
+                            id="backToModes"
+                            class="back-to-modes"
+                            type="button"
+                        >
+                            ← Back
+                        </button>
+
+                        <span class="eyebrow">
+                            COMPUTER OPPONENT
+                        </span>
+
+                        <h3>
+                            Select difficulty
+                        </h3>
+
+                        <p>
+                            How much of a challenge are you looking for?
+                        </p>
+
+                    </div>
+
+
+                    <div class="difficulty-grid">
+
+                        <button
+                            id="easyBtn"
+                            class="difficulty-card difficulty-easy"
+                            type="button"
+                        >
+
+                            <span class="difficulty-level">
+                                LEVEL 01
+                            </span>
+
+                            <strong>
+                                Easy
+                            </strong>
+
+                            <span>
+                                A relaxed match for casual play.
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            id="mediumBtn"
+                            class="difficulty-card difficulty-medium"
+                            type="button"
+                        >
+
+                            <span class="difficulty-level">
+                                LEVEL 02
+                            </span>
+
+                            <strong>
+                                Medium
+                            </strong>
+
+                            <span>
+                                A balanced opponent with strategy.
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            id="hardBtn"
+                            class="difficulty-card difficulty-hard"
+                            type="button"
+                        >
+
+                            <span class="difficulty-level">
+                                LEVEL 03
+                            </span>
+
+                            <strong>
+                                Hard
+                            </strong>
+
+                            <span>
+                                The ultimate test of your decisions.
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <footer class="menu-footer">
+
+                    <span>
+                        TIC TAC TOE ARENA
+                    </span>
+
+                    <span>
+                        v2.0
+                    </span>
+
+                </footer>
+
+            </div>
+
+        </section>
+
+
+        <!-- GAME -->
+
+        <section
+            id="game"
+            class="screen game-screen"
+            style="display: none;"
+        >
+
+            <div class="game-shell">
+
+                <!-- TOP BAR -->
+
+                <header class="game-topbar">
+
+                    <button
+                        id="homeBtn"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Return to home"
+                    >
+                        <span>←</span>
+                        <small>Home</small>
+                    </button>
+
+
+                    <div class="game-title">
+
+                        <span>
+                            ARENA
+                        </span>
+
+                        <strong>
+                            TIC TAC TOE
+                        </strong>
+
+                    </div>
+
+
+                    <button
+                        id="soundBtn"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Toggle sound"
+                    >
+                        <span class="sound-symbol">
+                            Sound
+                        </span>
+                    </button>
+
+                </header>
+
+
+                <!-- STATUS -->
+
+                <div class="game-status">
+
+                    <span class="status-label">
+                        CURRENT TURN
+                    </span>
+
+                    <h2 id="status">
+                        Player X Turn
+                    </h2>
+
+                </div>
+
+
+                <!-- SCOREBOARD -->
+
+                <div class="scoreboard">
+
+                    <div class="score-card score-x">
+
+                        <span class="score-player">
+                            PLAYER X
+                        </span>
+
+                        <strong id="xScore">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="score-card score-draw">
+
+                        <span class="score-player">
+                            DRAWS
+                        </span>
+
+                        <strong id="drawScore">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="score-card score-o">
+
+                        <span class="score-player">
+                            PLAYER O
+                        </span>
+
+                        <strong id="oScore">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BOARD -->
+
+                <div class="board-wrapper">
+
+                    <div class="board-label">
+                        GAME BOARD
+                    </div>
+
+                    <div class="board">
+
+                        <button type="button" aria-label="Cell 1"></button>
+                        <button type="button" aria-label="Cell 2"></button>
+                        <button type="button" aria-label="Cell 3"></button>
+
+                        <button type="button" aria-label="Cell 4"></button>
+                        <button type="button" aria-label="Cell 5"></button>
+                        <button type="button" aria-label="Cell 6"></button>
+
+                        <button type="button" aria-label="Cell 7"></button>
+                        <button type="button" aria-label="Cell 8"></button>
+                        <button type="button" aria-label="Cell 9"></button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONTROLS -->
+
+                <div class="game-controls">
+
+                    <button
+                        id="restartBtn"
+                        class="primary-control"
+                        type="button"
+                    >
+                        Restart Game
+                    </button>
+
+                    <button
+                        id="resetScoreBtn"
+                        class="secondary-control"
+                        type="button"
+                    >
+                        Reset Score
+                    </button>
+
+                </div>
+
+
+                <footer class="game-footer">
+
+                    <span>
+                        TIC TAC TOE ARENA
+                    </span>
+
+                    <span>
+                        PLAY. THINK. WIN.
+                    </span>
+
+                </footer>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- AUDIO -->
+
+    <audio
+        id="clickSound"
+        src="assets/sounds/click.mp3"
+        preload="auto"
+    ></audio>
+
+    <audio
+        id="moveSound"
+        src="assets/sounds/move.mp3"
+        preload="auto"
+    ></audio>
+
+    <audio
+        id="winSound"
+        src="assets/sounds/win.mp3"
+        preload="auto"
+    ></audio>
+
+    <audio
+        id="drawSound"
+        src="assets/sounds/draw.mp3"
+        preload="auto"
+    ></audio>
+
+
+    <script src="script.js" defer></script>
 
 </body>
 
