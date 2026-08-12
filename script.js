@@ -20,32 +20,44 @@ const easyBtn = document.getElementById("easyBtn");
 const mediumBtn = document.getElementById("mediumBtn");
 const hardBtn = document.getElementById("hardBtn");
 
+const backToModes = document.getElementById("backToModes");
+
 const restartBtn = document.getElementById("restartBtn");
 const resetScoreBtn = document.getElementById("resetScoreBtn");
 const soundBtn = document.getElementById("soundBtn");
 const homeBtn = document.getElementById("homeBtn");
 
-// -------------------------------
-// Audio
-// -------------------------------
+const difficultyBox = document.getElementById("difficultyBox");
+
+// =========================================================
+// AUDIO
+// =========================================================
 
 const clickSound = document.getElementById("clickSound");
 const moveSound = document.getElementById("moveSound");
 const winSound = document.getElementById("winSound");
 const drawSound = document.getElementById("drawSound");
 
-// -------------------------------
-// Game State
-// -------------------------------
 
-let boardState;
-let currentPlayer;
-let running;
+// =========================================================
+// GAME STATE
+// =========================================================
+
+let boardState = [
+    "", "", "",
+    "", "", "",
+    "", "", ""
+];
+
+let currentPlayer = "X";
+let running = false;
 
 let vsComputer = false;
 let difficulty = "easy";
 
 let soundEnabled = true;
+
+let aiThinking = false;
 
 let scores = {
     X: 0,
@@ -53,122 +65,231 @@ let scores = {
     Draw: 0
 };
 
-// -------------------------------
-// Win Patterns
-// -------------------------------
+
+// =========================================================
+// WIN PATTERNS
+// =========================================================
 
 const WIN_PATTERNS = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0,4,8],
-    [2,4,6]
+
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+
+    [0, 4, 8],
+    [2, 4, 6]
+
 ];
 
-// -------------------------------
-// Poki SDK
-// -------------------------------
+
+// =========================================================
+// POKI SDK
+// =========================================================
 
 const sdk = window.PokiSDK;
 
 async function initSDK() {
+
     if (!sdk) return;
 
     try {
+
         await sdk.init();
+
         console.log("Poki SDK Ready");
-    } catch (err) {
-        console.error(err);
+
+    } catch (error) {
+
+        console.error("Poki SDK initialization failed:", error);
+
     }
 }
+
 
 function gameLoaded() {
-    if (sdk && sdk.gameLoadingFinished) {
+
+    if (sdk && typeof sdk.gameLoadingFinished === "function") {
+
         sdk.gameLoadingFinished();
+
     }
+
 }
+
 
 function gameplayStart() {
-    if (sdk && sdk.gameplayStart) {
+
+    if (sdk && typeof sdk.gameplayStart === "function") {
+
         sdk.gameplayStart();
+
     }
+
 }
+
 
 function gameplayStop() {
-    if (sdk && sdk.gameplayStop) {
+
+    if (sdk && typeof sdk.gameplayStop === "function") {
+
         sdk.gameplayStop();
+
     }
+
 }
+
 
 async function commercialBreak() {
-    if (!sdk || !sdk.commercialBreak) return;
+
+    if (!sdk || typeof sdk.commercialBreak !== "function") {
+        return;
+    }
 
     try {
+
         await sdk.commercialBreak();
-    } catch (e) {
-        console.log(e);
+
+    } catch (error) {
+
+        console.log("Commercial break unavailable:", error);
+
     }
+
 }
 
-// -------------------------------
-// Local Storage
-// -------------------------------
+
+// =========================================================
+// LOCAL STORAGE
+// =========================================================
 
 function loadScores() {
+
     const data = localStorage.getItem("tttScores");
 
     if (data) {
+
         try {
-            scores = JSON.parse(data);
-        } catch {
+
+            const savedScores = JSON.parse(data);
+
+            scores = {
+                X: Number(savedScores.X) || 0,
+                O: Number(savedScores.O) || 0,
+                Draw: Number(savedScores.Draw) || 0
+            };
+
+        } catch (error) {
+
+            console.log("Could not load saved scores.");
+
             scores = {
                 X: 0,
                 O: 0,
                 Draw: 0
             };
+
         }
+
     }
 
     refreshScoreboard();
+
 }
 
+
 function saveScores() {
+
     localStorage.setItem(
         "tttScores",
         JSON.stringify(scores)
     );
+
 }
 
+
 function refreshScoreboard() {
+
     xScoreText.textContent = scores.X;
     oScoreText.textContent = scores.O;
     drawScoreText.textContent = scores.Draw;
+
 }
 
-// -------------------------------
-// Loading
-// -------------------------------
+
+// =========================================================
+// LOADING
+// =========================================================
 
 window.addEventListener("load", async () => {
+
     await initSDK();
 
     loadScores();
 
     setTimeout(() => {
+
         loadingScreen.style.display = "none";
+
         app.style.display = "block";
+
         gameLoaded();
-    }, 1500);
+
+    }, 1000);
+
 });
 
-// -------------------------------
-// New Game
-// -------------------------------
+
+// =========================================================
+// UI HELPERS
+// =========================================================
+
+function showHome() {
+
+    menu.classList.remove("difficulty-open");
+
+    menu.style.display = "flex";
+
+    game.style.display = "none";
+
+    difficultyBox.style.display = "none";
+
+}
+
+
+function showDifficulty() {
+
+    menu.classList.add("difficulty-open");
+
+    menu.style.display = "flex";
+
+    game.style.display = "none";
+
+    difficultyBox.style.display = "block";
+
+}
+
+
+function showGame() {
+
+    menu.classList.remove("difficulty-open");
+
+    menu.style.display = "none";
+
+    game.style.display = "block";
+
+}
+
+
+// =========================================================
+// NEW GAME
+// =========================================================
 
 function newGame() {
+
     boardState = [
         "", "", "",
         "", "", "",
@@ -176,320 +297,515 @@ function newGame() {
     ];
 
     currentPlayer = "X";
+
     running = true;
+
+    aiThinking = false;
 
     statusText.textContent = "Player X Turn";
 
     cells.forEach(cell => {
+
         cell.innerHTML = "";
 
         cell.disabled = false;
 
         cell.classList.remove("winner");
         cell.classList.remove("pop");
+
     });
+
 }
 
-// -------------------------------
-// Open Game Screen
-// -------------------------------
+
+// =========================================================
+// OPEN GAME
+// =========================================================
 
 function openGame() {
-    menu.style.display = "none";
-    game.style.display = "block";
+
+    showGame();
 
     gameplayStart();
 
     newGame();
+
 }
 
-// -------------------------------
-// Menu Buttons
-// -------------------------------
+
+// =========================================================
+// LOCAL MULTIPLAYER
+// =========================================================
 
 localBtn.addEventListener("click", () => {
+
     vsComputer = false;
+
     openGame();
+
 });
+
+
+// =========================================================
+// COMPUTER MENU
+// =========================================================
 
 computerBtn.addEventListener("click", () => {
+
     vsComputer = true;
+
+    showDifficulty();
+
 });
+
+
+// =========================================================
+// BACK TO GAME MODES
+// =========================================================
+
+if (backToModes) {
+
+    backToModes.addEventListener("click", () => {
+
+        vsComputer = false;
+
+        showHome();
+
+    });
+
+}
+
+
+// =========================================================
+// DIFFICULTY
+// =========================================================
 
 easyBtn.addEventListener("click", () => {
+
     difficulty = "easy";
+
+    vsComputer = true;
+
     openGame();
+
 });
+
 
 mediumBtn.addEventListener("click", () => {
+
     difficulty = "medium";
+
+    vsComputer = true;
+
     openGame();
+
 });
+
 
 hardBtn.addEventListener("click", () => {
+
     difficulty = "hard";
+
+    vsComputer = true;
+
     openGame();
+
 });
 
-// -------------------------------
-// Restart
-// -------------------------------
+
+// =========================================================
+// RESTART
+// =========================================================
 
 restartBtn.addEventListener("click", () => {
+
     playSound(clickSound);
+
     newGame();
+
 });
 
-// -------------------------------
-// Home
-// -------------------------------
+
+// =========================================================
+// HOME
+// =========================================================
 
 homeBtn.addEventListener("click", () => {
+
+    running = false;
+
+    aiThinking = false;
+
     gameplayStop();
 
-    menu.style.display = "block";
-    game.style.display = "none";
+    showHome();
+
 });
 
-// -------------------------------
-// Cell Click
-// -------------------------------
+
+// =========================================================
+// CELL CLICK
+// =========================================================
 
 cells.forEach((cell, index) => {
+
     cell.addEventListener("click", () => {
+
         if (!running) return;
+
+        if (aiThinking) return;
+
         if (boardState[index] !== "") return;
 
-        // In computer mode, only human player X can click.
+        // In computer mode, only X is controlled by the human.
         if (vsComputer && currentPlayer !== "X") return;
 
-        // Make the move for the current player.
-        makeMove(index, currentPlayer);
 
+        // Make the player's move.
+        const moved = makeMove(index, currentPlayer);
+
+        if (!moved) return;
+
+
+        // Check whether the move ended the game.
         if (checkWinner()) return;
+
         if (checkDraw()) return;
 
+
+        // Computer mode.
         if (vsComputer) {
-            // X has moved. Give the turn to AI O.
+
             switchPlayer();
+
+            aiThinking = true;
+
             running = false;
 
+            disableBoard();
+
             setTimeout(() => {
-                if (!vsComputer || currentPlayer !== "O") return;
+
+                if (!vsComputer) return;
+
+                if (currentPlayer !== "O") return;
 
                 running = true;
+
+                aiThinking = false;
+
+                enableBoard();
+
                 aiMove();
+
             }, 450);
 
             return;
         }
 
-        // Local multiplayer: alternate X and O.
+
+        // Local multiplayer.
         switchPlayer();
+
     });
+
 });
 
-// -------------------------------
-// Make Move
-// -------------------------------
+
+// =========================================================
+// MAKE MOVE
+// =========================================================
 
 function makeMove(index, player) {
-    if (boardState[index] !== "") return false;
+
+    if (boardState[index] !== "") {
+        return false;
+    }
+
 
     boardState[index] = player;
 
-    // Remove any old content.
+
+    // Clear the cell first.
     cells[index].innerHTML = "";
 
-    // Create a clean CSS-rendered X or O.
+
+    // Create CSS X/O mark.
     const mark = document.createElement("span");
-    mark.className = `mark mark-${player.toLowerCase()}`;
+
+    if (player === "X") {
+
+        mark.className = "mark mark-x";
+
+    } else {
+
+        mark.className = "mark mark-o";
+
+    }
+
 
     cells[index].appendChild(mark);
 
     cells[index].classList.add("pop");
 
+
     setTimeout(() => {
+
         cells[index].classList.remove("pop");
+
     }, 200);
+
 
     playSound(moveSound);
 
     return true;
+
 }
 
-// -------------------------------
-// Change Turn
-// -------------------------------
+
+// =========================================================
+// CHANGE TURN
+// =========================================================
 
 function switchPlayer() {
+
     currentPlayer =
-        currentPlayer === "X" ? "O" : "X";
+        currentPlayer === "X"
+            ? "O"
+            : "X";
+
 
     statusText.textContent =
         currentPlayer === "X"
             ? "Player X Turn"
             : "Player O Turn";
+
 }
 
-// -------------------------------
-// Play Sound
-// -------------------------------
+
+// =========================================================
+// BOARD ENABLE / DISABLE
+// =========================================================
+
+function disableBoard() {
+
+    cells.forEach(cell => {
+
+        cell.disabled = true;
+
+    });
+
+}
+
+
+function enableBoard() {
+
+    cells.forEach((cell, index) => {
+
+        cell.disabled =
+            !running ||
+            boardState[index] !== "";
+
+    });
+
+}
+
+
+// =========================================================
+// SOUND
+// =========================================================
 
 function playSound(sound) {
-    if (!soundEnabled || !sound) return;
 
-    sound.currentTime = 0;
+    if (!soundEnabled) return;
 
-    const result = sound.play();
+    if (!sound) return;
 
-    if (result && typeof result.catch === "function") {
-        result.catch(() => {});
+    try {
+
+        sound.currentTime = 0;
+
+        const promise = sound.play();
+
+        if (promise !== undefined) {
+
+            promise.catch(() => {});
+
+        }
+
+    } catch (error) {
+
+        console.log("Sound playback unavailable.");
+
     }
+
 }
 
-// -------------------------------
-// Sound Toggle
-// -------------------------------
+
+// =========================================================
+// SOUND TOGGLE
+// =========================================================
 
 soundBtn.addEventListener("click", () => {
+
     soundEnabled = !soundEnabled;
 
-    soundBtn.textContent =
+    soundBtn.innerHTML =
         soundEnabled
-            ? "Sound"
-            : "Muted";
+            ? '<span class="sound-symbol">Sound</span>'
+            : '<span class="sound-symbol">Muted</span>';
+
 });
 
-// -------------------------------
-// Winner
-// -------------------------------
+
+// =========================================================
+// CHECK WINNER
+// =========================================================
 
 function checkWinner() {
+
     for (const pattern of WIN_PATTERNS) {
+
         const [a, b, c] = pattern;
+
 
         if (
             boardState[a] !== "" &&
             boardState[a] === boardState[b] &&
             boardState[b] === boardState[c]
         ) {
+
             running = false;
+
+            aiThinking = false;
+
 
             cells[a].classList.add("winner");
             cells[b].classList.add("winner");
             cells[c].classList.add("winner");
 
+
+            disableBoard();
+
+
             const winner = boardState[a];
+
 
             statusText.textContent =
                 winner === "X"
                     ? "Player X Wins!"
                     : "Player O Wins!";
 
+
             scores[winner]++;
 
             refreshScoreboard();
+
             saveScores();
 
             playSound(winSound);
 
             gameplayStop();
 
+
             setTimeout(async () => {
+
                 await commercialBreak();
+
             }, 1200);
 
+
             return true;
+
         }
+
     }
 
     return false;
+
 }
 
-// -------------------------------
-// Draw
-// -------------------------------
+
+// =========================================================
+// DRAW
+// =========================================================
 
 function checkDraw() {
-    if (boardState.includes("")) return false;
+
+    if (boardState.includes("")) {
+        return false;
+    }
+
 
     running = false;
+
+    aiThinking = false;
+
 
     scores.Draw++;
 
     refreshScoreboard();
+
     saveScores();
 
+
     statusText.textContent = "Draw!";
+
 
     playSound(drawSound);
 
     gameplayStop();
 
+
     setTimeout(async () => {
+
         await commercialBreak();
+
     }, 1200);
 
+
     return true;
+
 }
 
-// -------------------------------
-// Reset Scores
-// -------------------------------
+
+// =========================================================
+// RESET SCORES
+// =========================================================
 
 resetScoreBtn.addEventListener("click", () => {
+
     scores = {
         X: 0,
         O: 0,
         Draw: 0
     };
 
+
     refreshScoreboard();
+
     saveScores();
+
+    playSound(clickSound);
+
 });
 
-// -------------------------------
-// Keyboard Shortcuts
-// -------------------------------
 
-document.addEventListener("keydown", (e) => {
-    if (e.key === "r" || e.key === "R") {
-        restartBtn.click();
-    }
-});
-
-// -------------------------------
-// Prevent Text Selection
-// -------------------------------
-
-document.addEventListener("selectstart", (e) => {
-    e.preventDefault();
-});
-
-// -------------------------------
-// Pause Sounds
-// -------------------------------
-
-document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-        clickSound.pause();
-        moveSound.pause();
-        winSound.pause();
-        drawSound.pause();
-    }
-});
-
-// -------------------------------
-// AI Move
-// -------------------------------
+// =========================================================
+// COMPUTER AI
+// =========================================================
 
 function aiMove() {
-    if (!running) return;
+
     if (!vsComputer) return;
+
+    if (!running) return;
+
     if (currentPlayer !== "O") return;
 
+
     switch (difficulty) {
+
         case "easy":
             easyMove();
             break;
@@ -501,74 +817,159 @@ function aiMove() {
         case "hard":
             hardMove();
             break;
+
+        default:
+            easyMove();
+
     }
+
+
+    // Check result after AI move.
 
     if (checkWinner()) return;
+
     if (checkDraw()) return;
 
+
+    // Return control to X.
+
     switchPlayer();
+
     running = true;
+
+    aiThinking = false;
+
+    enableBoard();
+
 }
 
-// -------------------------------
-// Easy AI
-// -------------------------------
+
+// =========================================================
+// EASY AI
+// =========================================================
 
 function easyMove() {
+
     const empty = [];
 
+
     for (let i = 0; i < boardState.length; i++) {
+
         if (boardState[i] === "") {
+
             empty.push(i);
+
         }
+
     }
+
 
     if (empty.length === 0) return;
 
+
     const randomMove =
-        empty[Math.floor(Math.random() * empty.length)];
+        empty[
+            Math.floor(
+                Math.random() * empty.length
+            )
+        ];
+
 
     makeMove(randomMove, "O");
+
 }
 
-// -------------------------------
-// Medium AI
-// -------------------------------
+
+// =========================================================
+// MEDIUM AI
+// =========================================================
 
 function mediumMove() {
-    // Win if possible.
+
+    // Try to win.
+
     let move = findWinningMove("O");
 
+
     if (move !== -1) {
+
         makeMove(move, "O");
+
         return;
+
     }
 
-    // Block player.
+
+    // Block the player.
+
     move = findWinningMove("X");
 
+
     if (move !== -1) {
+
         makeMove(move, "O");
+
         return;
+
     }
 
-    // Center.
+
+    // Take center.
+
     if (boardState[4] === "") {
+
         makeMove(4, "O");
+
         return;
+
     }
 
-    // Random move.
+
+    // Take a corner when possible.
+
+    const corners = [0, 2, 6, 8];
+
+    const availableCorners =
+        corners.filter(
+            index => boardState[index] === ""
+        );
+
+
+    if (availableCorners.length > 0) {
+
+        const randomCorner =
+            availableCorners[
+                Math.floor(
+                    Math.random() *
+                    availableCorners.length
+                )
+            ];
+
+
+        makeMove(randomCorner, "O");
+
+        return;
+
+    }
+
+
+    // Otherwise random.
+
     easyMove();
+
 }
 
-// -------------------------------
-// Find Winning Move
-// -------------------------------
+
+// =========================================================
+// FIND WINNING MOVE
+// =========================================================
 
 function findWinningMove(player) {
+
     for (const pattern of WIN_PATTERNS) {
+
         const [a, b, c] = pattern;
+
 
         const line = [
             boardState[a],
@@ -576,60 +977,109 @@ function findWinningMove(player) {
             boardState[c]
         ];
 
+
         const playerCount =
-            line.filter(v => v === player).length;
+            line.filter(
+                value => value === player
+            ).length;
+
 
         const emptyCount =
-            line.filter(v => v === "").length;
+            line.filter(
+                value => value === ""
+            ).length;
 
-        if (playerCount === 2 && emptyCount === 1) {
-            if (boardState[a] === "") return a;
-            if (boardState[b] === "") return b;
-            if (boardState[c] === "") return c;
+
+        if (
+            playerCount === 2 &&
+            emptyCount === 1
+        ) {
+
+            if (boardState[a] === "") {
+                return a;
+            }
+
+            if (boardState[b] === "") {
+                return b;
+            }
+
+            if (boardState[c] === "") {
+                return c;
+            }
+
         }
+
     }
 
+
     return -1;
+
 }
 
-// -------------------------------
-// Hard AI
-// -------------------------------
+
+// =========================================================
+// HARD AI - MINIMAX
+// =========================================================
 
 function hardMove() {
+
     let bestScore = -Infinity;
+
     let bestMove = -1;
 
+
     for (let i = 0; i < 9; i++) {
+
         if (boardState[i] !== "") continue;
+
 
         boardState[i] = "O";
 
+
         const score =
-            minimax(boardState, 0, false);
+            minimax(
+                boardState,
+                0,
+                false
+            );
+
 
         boardState[i] = "";
 
+
         if (score > bestScore) {
+
             bestScore = score;
+
             bestMove = i;
+
         }
+
     }
+
 
     if (bestMove !== -1) {
+
         makeMove(bestMove, "O");
+
     }
+
 }
 
-// -------------------------------
-// Minimax
-// -------------------------------
+
+// =========================================================
+// MINIMAX
+// =========================================================
 
 function minimax(board, depth, isMaximizing) {
+
     const result = evaluateBoard(board);
 
+
     if (result !== null) {
+
         switch (result) {
+
             case "O":
                 return 10 - depth;
 
@@ -638,125 +1088,294 @@ function minimax(board, depth, isMaximizing) {
 
             case "draw":
                 return 0;
+
         }
+
     }
 
+
+    // AI turn.
+
     if (isMaximizing) {
+
         let bestScore = -Infinity;
 
+
         for (let i = 0; i < 9; i++) {
+
             if (board[i] !== "") continue;
+
 
             board[i] = "O";
 
+
             const score =
-                minimax(board, depth + 1, false);
+                minimax(
+                    board,
+                    depth + 1,
+                    false
+                );
+
 
             board[i] = "";
 
+
             bestScore =
-                Math.max(bestScore, score);
+                Math.max(
+                    bestScore,
+                    score
+                );
+
         }
 
+
         return bestScore;
+
     }
+
+
+    // Human turn.
 
     let bestScore = Infinity;
 
+
     for (let i = 0; i < 9; i++) {
+
         if (board[i] !== "") continue;
+
 
         board[i] = "X";
 
+
         const score =
-            minimax(board, depth + 1, true);
+            minimax(
+                board,
+                depth + 1,
+                true
+            );
+
 
         board[i] = "";
 
+
         bestScore =
-            Math.min(bestScore, score);
+            Math.min(
+                bestScore,
+                score
+            );
+
     }
 
+
     return bestScore;
+
 }
 
-// -------------------------------
-// Board Evaluation
-// -------------------------------
+
+// =========================================================
+// BOARD EVALUATION
+// =========================================================
 
 function evaluateBoard(board) {
+
     for (const pattern of WIN_PATTERNS) {
+
         const [a, b, c] = pattern;
+
 
         if (
             board[a] !== "" &&
             board[a] === board[b] &&
             board[b] === board[c]
         ) {
+
             return board[a];
+
         }
+
     }
 
-    if (board.every(cell => cell !== "")) {
+
+    if (
+        board.every(
+            cell => cell !== ""
+        )
+    ) {
+
         return "draw";
+
     }
+
 
     return null;
+
 }
 
-// -------------------------------
-// Prevent Double Touch
-// -------------------------------
+
+// =========================================================
+// KEYBOARD SHORTCUTS
+// =========================================================
+
+document.addEventListener("keydown", event => {
+
+    if (
+        event.key === "r" ||
+        event.key === "R"
+    ) {
+
+        if (
+            game.style.display !== "none"
+        ) {
+
+            restartBtn.click();
+
+        }
+
+    }
+
+
+    if (event.key === "Escape") {
+
+        if (
+            menu.classList.contains(
+                "difficulty-open"
+            )
+        ) {
+
+            showHome();
+
+        }
+
+    }
+
+});
+
+
+// =========================================================
+// PREVENT TEXT SELECTION
+// =========================================================
+
+document.addEventListener(
+    "selectstart",
+    event => {
+
+        event.preventDefault();
+
+    }
+);
+
+
+// =========================================================
+// PREVENT CONTEXT MENU
+// =========================================================
+
+document.addEventListener(
+    "contextmenu",
+    event => {
+
+        event.preventDefault();
+
+    }
+);
+
+
+// =========================================================
+// TOUCH HANDLING
+// =========================================================
 
 let lastTouch = 0;
 
+
 document.addEventListener(
     "touchend",
-    (e) => {
+    event => {
+
         const now = Date.now();
 
-        if (now - lastTouch <= 300) {
-            e.preventDefault();
+
+        if (
+            now - lastTouch <= 300
+        ) {
+
+            event.preventDefault();
+
         }
 
+
         lastTouch = now;
+
     },
-    { passive: false }
+    {
+        passive: false
+    }
 );
 
-// -------------------------------
-// Disable Right Click
-// -------------------------------
 
-document.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-});
+// =========================================================
+// VISIBILITY / AUDIO
+// =========================================================
 
-// -------------------------------
-// Window Blur
-// -------------------------------
+document.addEventListener(
+    "visibilitychange",
+    () => {
 
-window.addEventListener("blur", () => {
-    clickSound.pause();
-    moveSound.pause();
-    winSound.pause();
-    drawSound.pause();
-});
+        if (document.hidden) {
 
-// -------------------------------
-// Window Focus
-// -------------------------------
+            clickSound.pause();
+            moveSound.pause();
+            winSound.pause();
+            drawSound.pause();
 
-window.addEventListener("focus", () => {
-    clickSound.currentTime = 0;
-});
+        }
 
-// -------------------------------
-// Animation Cleanup
-// -------------------------------
+    }
+);
+
+
+// =========================================================
+// WINDOW BLUR
+// =========================================================
+
+window.addEventListener(
+    "blur",
+    () => {
+
+        clickSound.pause();
+        moveSound.pause();
+        winSound.pause();
+        drawSound.pause();
+
+    }
+);
+
+
+// =========================================================
+// WINDOW FOCUS
+// =========================================================
+
+window.addEventListener(
+    "focus",
+    () => {
+
+        clickSound.currentTime = 0;
+
+    }
+);
+
+
+// =========================================================
+// ANIMATION CLEANUP
+// =========================================================
 
 cells.forEach(cell => {
-    cell.addEventListener("animationend", () => {
-        cell.classList.remove("pop");
-    });
+
+    cell.addEventListener(
+        "animationend",
+        () => {
+
+            cell.classList.remove("pop");
+
+        }
+    );
+
 });
