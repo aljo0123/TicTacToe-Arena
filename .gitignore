@@ -1,0 +1,51 @@
+
+# =========================================================
+# Tic Tac Toe Arena — .gitignore
+# Keeps source, docs, tests and build config; excludes
+# generated output, local QA artifacts and environment files.
+# =========================================================
+
+# --- Dependencies -----------------------------------------
+node_modules/
+
+# --- Generated production builds ---------------------------
+# Builds are reproducible via `node build.js <target>`; the
+# README documents the exact commands, so dist/ is not needed
+# in Git. (Re-add only if you want snapshot builds published.)
+dist/
+
+# --- Local capture / QA / verification artifacts -----------
+capture/           # recorded gameplay frames
+build/             # video-assembly staging frames
+check/             # decoded video verification frames
+
+# --- Temporary QA scripts (session-level browser tests) ----
+qa-*.mjs
+qa-audit*.py
+audit_*.py
+
+# --- Root-level screenshots from local QA sessions ---------
+*.png
+# Real brand/marketing assets stay tracked:
+!assets/**/*.png
+
+# --- Generated upload archives -----------------------------
+*.zip
+
+# --- Local logo master (2.5 MB, regenerable from mark-256) -
+logo.png
+
+# --- Environment / credentials (never commit) --------------
+.env
+.env.*
+*.pem
+*.key
+*token*
+*credential*
+secrets.*
+
+# --- Misc local files --------------------------------------
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
