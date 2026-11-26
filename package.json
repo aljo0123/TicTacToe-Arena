@@ -1,0 +1,11 @@
+{
+    "name": "tic-tac-toe-arena",
+    "version": "3.2.0",
+    "description": "Tic Tac Toe Arena — professional browser game",
+    "type": "module",
+    "scripts": {
+        "test": "node tests/main.js",
+        "build": "node build.js"
+    },
+    "license": "MIT"
+}
