@@ -6,7 +6,7 @@ modes, four AI difficulty levels (including a provably unbeatable
 built in vanilla JavaScript with three isolated production builds for
 Web, Poki and CrazyGames.
 
-> **Demo:** <!-- TODO: add live demo URL after GitHub Pages deployment -->
+> **Demo:** https://aljo0123.github.io/TicTacToe-Arena/<!-- TODO: add live demo URL after GitHub Pages deployment -->
 > **Video walkthrough:** <!-- TODO: add video link -->
 > **Screenshots:** <!-- TODO: add screenshot links -->
 
